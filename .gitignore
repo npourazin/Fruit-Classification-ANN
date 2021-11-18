@@ -8,3 +8,6 @@ venv/
 
 # Dataset Images
 ANN_Project_Assets/Datasets/Fruits-360/
+
+# Personal temprory file
+trashcan.py
