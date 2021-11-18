@@ -38,7 +38,7 @@ def load_and_get_set(test_or_train, feature_file_path, label_file_path):
     random.shuffle(myset)
 
     # print size
-    print(len(myset))
+    print("The loaded set's size: ", len(myset))
 
     return myset
 

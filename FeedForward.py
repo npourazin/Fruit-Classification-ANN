@@ -33,12 +33,11 @@ def check_accuracy(calculated_labels, correct_labels):
     return calculated_ans == correct_ans
 
 
-def run_network_once():
-    data_size = 200
-    correct_ans_count = 0
+def run_feed_forward():
+    data_size = 200  # number of train set elements taken from the train set
+    correct_ans_count = 0  # number of correct answers, initialized at 0
 
     for td in train_set[:data_size]:
-        # print("label", td[1])
         z = [
             np.zeros((layer_sizes[0], 1)),
             np.zeros((layer_sizes[1], 1)),
@@ -46,14 +45,19 @@ def run_network_once():
             np.zeros((layer_sizes[3], 1))
 
         ]
+
+        # values of the first layer (0th), initialized as the train data
         z[0] = td[0]
         np.reshape(z[0], (102, 1))
+
         for i in range(1, 4):
+            # for each next layer, z is calculated as discussed below
             z[i] = sigmoid(W[i - 1] @ z[i - 1] + B[i - 1])
 
         if check_accuracy(z[3], td[1]):
             correct_ans_count += 1
 
-    print(correct_ans_count/data_size)
+    return correct_ans_count / data_size
 
-run_network_once()
+
+print("Feed Forward Accuracy: ", run_feed_forward())
