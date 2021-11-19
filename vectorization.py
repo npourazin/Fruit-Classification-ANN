@@ -36,7 +36,7 @@ def check_accuracy(calculated_labels, correct_labels):
 
 
 def run_feed_forward():
-    data_size = 200  # number of train set elements taken from the train set
+    data_size = 1000  # number of train set elements taken from the train set
     correct_ans_count = 0  # number of correct answers, initialized at 0
 
     for td in train_set[:data_size]:
@@ -62,8 +62,6 @@ def run_feed_forward():
     return correct_ans_count / data_size
 
 
-# ----------------------------------------
-
 def d_sigmoid(x):
     return sigmoid(x) * (1 - sigmoid(x))
 
@@ -71,12 +69,14 @@ def d_sigmoid(x):
 # Hyper parameters
 batch_size = 10
 learning_rate = 0.6
-epoch_number = 5
+epoch_number = 10
 costs = []
 
 
-def run_back_propagated():
-    data_size = 200
+# ----------------------------------------
+
+def run_vectorized_back_propagation():
+    data_size = 1000
     trimmed_train_set = train_set[:data_size]
 
     for i in range(0, epoch_number):
@@ -112,36 +112,23 @@ def run_back_propagated():
                     # for each next layer, z is calculated as discussed below
                     z[j] = sigmoid(W[j - 1] @ z[j - 1] + B[j - 1])
 
-                # ** layer 4
-                for j in range(layer_sizes[3]):
-                    grad_B[2][j, 0] += 2 * (z[3][j, 0] - td[1][j, 0]) * d_sigmoid(z[3][j, 0])  # bias layer 4
+                # ** layer 4 to 3
+                grad_B[2] += (2 * d_sigmoid(z[3]) * (z[3] - td[1]))  # bias layer 4
+                grad_W[2] += (2 * d_sigmoid(z[3]) * (z[3] - td[1])) @ np.transpose(z[2])
 
-                    for k in range(layer_sizes[2]):  # weight layer 4
-                        grad_W[2][j, k] += 2 * (z[3][j, 0] - td[1][j, 0]) * d_sigmoid(z[3][j, 0]) * z[2][k, 0]
+                # delta_2 = np.zeros((layer_sizes[2], 1))
+                delta_2 = (np.transpose(W[2])) @ (2 * d_sigmoid(z[3]) * (z[3] - td[1]))
 
-                delta_2 = np.zeros((layer_sizes[2], 1))
-                for k in range(layer_sizes[2]):
-                    for j in range(layer_sizes[3]):
-                        delta_2[k, 0] += 2 * (z[3][j, 0] - td[1][j, 0]) * d_sigmoid(z[3][j, 0]) * W[2][j, k]
+                # ** layer 3 to 2
+                grad_B[1] += delta_2 * d_sigmoid(z[2])  # bias layer 3
+                grad_W[1] += (delta_2 * d_sigmoid(z[2])) @ np.transpose(z[1])
 
-                # ** layer 3
-                for j in range(layer_sizes[2]):
-                    grad_B[1][j, 0] += delta_2[j, 0] * d_sigmoid(z[2][j, 0])  # bias layer 3
+                # delta_1 = np.zeros((layer_sizes[1], 1))
+                delta_1 = np.transpose(W[1]) @ (2 * d_sigmoid(z[2]) * delta_2)
 
-                    for k in range(layer_sizes[1]):  # weight layer 3
-                        grad_W[1][j, k] += delta_2[j, 0] * d_sigmoid(z[2][j, 0]) * z[1][k, 0]
-
-                delta_1 = np.zeros((layer_sizes[1], 1))
-                for k in range(layer_sizes[1]):
-                    for j in range(layer_sizes[2]):
-                        delta_1[k, 0] += delta_2[j, 0] * d_sigmoid(z[2][j, 0]) * W[1][j, k]
-
-                # ** layer 2
-                for j in range(layer_sizes[1]):
-                    grad_B[0][j, 0] += delta_1[j, 0] * d_sigmoid(z[1][j, 0])  # bias layer 2
-
-                    for k in range(layer_sizes[0]):  # weight layer 2
-                        grad_W[0][j, k] += delta_1[j, 0] * d_sigmoid(z[1][j, 0]) * z[0][k, 0]
+                # ** layer 2 to 1
+                grad_B[0] += delta_1 * d_sigmoid(z[1])  # bias layer 2
+                grad_W[0] += delta_1 * d_sigmoid(z[1]) @ np.transpose(z[0])
 
             # update, using the gradient
             for ind in range(0, 3):
@@ -171,7 +158,7 @@ def run_back_propagated():
         costs.append(cost)
 
 
-run_back_propagated()
+run_vectorized_back_propagation()
 
 epoch_size = [x for x in range(epoch_number)]
 plt.plot(epoch_size, costs)
