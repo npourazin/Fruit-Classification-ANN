@@ -149,6 +149,7 @@ def run_back_propagated():
                 B[ind] -= learning_rate * (grad_B[ind] / batch_size)
 
         cost = 0
+        correct_ans_count = 0
         for td in trimmed_train_set:
             z = [
                 np.zeros((layer_sizes[0], 1)),
@@ -166,7 +167,11 @@ def run_back_propagated():
 
             for j in range(layer_sizes[3]):
                 cost += np.power((z[3][j, 0] - td[1][j, 0]), 2)
+            if check_accuracy(z[3], td[1]):
+                correct_ans_count += 1
 
+        print(correct_ans_count)
+        print(data_size)
         cost /= data_size
         costs.append(cost)
 
