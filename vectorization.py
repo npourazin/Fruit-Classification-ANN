@@ -68,7 +68,7 @@ def d_sigmoid(x):
 
 # Hyper parameters
 batch_size = 10
-learning_rate = 0.6
+learning_rate = 1
 epoch_number = 5
 costs = []
 
